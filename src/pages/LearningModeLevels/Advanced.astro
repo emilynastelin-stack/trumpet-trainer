@@ -1,0 +1,704 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const serverImages = [
+  'Fsharp0.png',
+  'G0.png',
+  'Gsharp0.png',
+  'Aflat0.png',
+  'A0.png',
+  'Asharp0.png',
+  'Bflat0.png',
+  'B0.png',
+  'Bsharp0.png',
+  'Cflat1.png',
+  'C1.png',
+  'Csharp1.png',
+  'Dflat1.png',
+  'D1.png',
+  'Dsharp1.png',
+  'Eflat1.png',
+  'E1.png',
+  'Esharp1.png',
+  'Fflat1.png',
+  'F1.png',
+  'Fsharp1.png',
+  'G1.png',
+  'Gsharp1.png',
+  'Aflat1.png',
+  'A1.png',
+  'Asharp1.png',
+  'Bflat1.png',
+  'B1.png',
+  'Bsharp1.png',
+  'Cflat2.png',
+  'C2.png',
+  'Csharp2.png',
+  'Dflat2.png',
+  'D2.png',
+  'Dsharp2.png',
+  'Eflat2.png',
+  'E2.png',
+  'Esharp2.png',
+  'Fflat2.png',
+  'F2.png',
+  'Fsharp2.png',
+  'G2.png',
+  'Gsharp2.png',
+  'Aflat2.png',
+  'A2.png',
+  'Asharp2.png',
+  'Bflat2.png',
+  'B2.png',
+  'C3.png'
+];
+
+const initialImage = serverImages[Math.floor(Math.random() * serverImages.length)];
+---
+
+<Layout>
+  <main style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding-top:0; min-height:100vh; padding-left:2rem; padding-right:2rem; box-sizing:border-box; background: #1f1c2c; color: white; position:relative;">
+
+    <!-- Streak display (moved above card) -->
+    <div id="streak" style="position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.36); color: #fff; padding: 0.5rem 0.75rem; border-radius: 10px; font-weight:700; box-shadow: 0 6px 18px rgba(0,0,0,0.6); z-index:12;">
+      Streak: <span id="streak-value">0</span>
+      <small style="opacity:0.8; margin-left:6px;">Best: <span id="best-value">0</span></small>
+    </div>
+
+    <!-- Run results overlay (moved above card) -->
+    <div id="run-overlay" style="display:none; position: absolute; inset:0; background: rgba(0,0,0,0.72); align-items:center; justify-content:center; z-index:20;">
+      <div id="run-panel" style="background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); color: white; padding: 2rem; border-radius: 12px; text-align:center; width: min(420px, 90%); box-shadow: 0 18px 60px rgba(2,6,23,0.6);">
+        <h2 id="run-title" style="margin:0 0 8px 0; font-size:1.6rem;">Results</h2>
+        <p id="run-msg" style="margin:0.25rem 0 1rem 0; font-size:1.05rem; opacity:0.95;">You finished the run.</p>
+        <div style="font-size:2.2rem; font-weight:800; margin-bottom:0.75rem;"><span id="run-score">0%</span></div>
+        <div style="display:flex; gap:0.5rem; justify-content:center;">
+          <button id="run-restart" class="gp-btn" style="padding:0.6rem 1rem; border-radius:8px;">Restart</button>
+          <button id="run-close" class="gp-btn" style="padding:0.6rem 1rem; border-radius:8px; background: linear-gradient(90deg,#6b7280,#374151);">Close</button>
+        </div>
+      </div>
+    </div>
+
+  <div class="card" style="position:relative; width:100%; max-width:760px; box-sizing:border-box; padding:1rem; border-radius:14px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); box-shadow:0 18px 60px rgba(2,6,23,0.6); transform: translateY(6vh); transition: transform 320ms ease;">
+
+      <!-- Fingering Image -->
+      <img
+        id="fingeringImg"
+        class="fingering-img"
+        src={`/assets/images/${initialImage}`}
+        data-images={JSON.stringify(serverImages)}
+        data-initial={initialImage}
+        alt="Random Fingering"
+        tabindex="0"
+        role="img"
+        aria-label="Random fingering image"
+        style="max-width:300px; width:80%; border-radius:1rem; box-shadow:0 8px 20px rgba(0,0,0,0.5); margin-bottom:2rem; outline:none; display:block; margin-left:auto; margin-right:auto;"
+      />
+
+      
+
+      <!-- Gamepad -->
+      <div id="gamepad" style="display:flex; flex-direction:column; align-items:center; gap:0.6rem; margin-top:1.25rem;">
+        <div style="display:flex; gap:0.6rem; justify-content:center;">
+         <button data-button="1" class="gp-btn" style="width:96px; height:96px; border-radius:16px;">1</button>
+         <button data-button="2" class="gp-btn" style="width:96px; height:96px; border-radius:16px;">2</button>
+         <button data-button="3" class="gp-btn" style="width:96px; height:96px; border-radius:16px;">3</button>
+        </div>
+        <button data-button="0" id="gp-zero" class="gp-btn" style="width:320px; height:80px; border-radius:40px;">0</button>
+      </div>
+
+      <!-- Test controls removed (shake test) -->
+
+    <style>
+      :root{
+        --anim-pop: 680ms;
+        --anim-correct: 700ms;
+        --anim-confetti: 1000ms;
+        --anim-shake: 200ms; /* faster shake */
+        --anim-wrong-glow: 360ms;
+        --anim-safety: 420ms;
+        --reveal-duration: 2500ms;
+        --press-duration: 120ms;
+      }
+    /* Image animations */
+    /* Temporarily disable base transition so shake keyframes are fully visible while testing */
+    .fingering-img { /* transition: transform 320ms ease, opacity 320ms ease, filter 320ms ease; */ cursor:pointer; }
+  .fingering-anim { animation: popRotateHue var(--anim-pop) cubic-bezier(.2,.9,.3,1); box-shadow: 0 30px 80px rgba(14,165,164,0.35) !important; border-radius:1rem; transform-origin:50% 60%; }
+    @keyframes popRotateHue { 0%{transform:scale(0.88) rotate(-12deg);opacity:0;}50%{transform:scale(1.14) rotate(8deg);opacity:1;}100%{transform:scale(1) rotate(0deg);opacity:1;} }
+
+      /* Correct combo: pop + hue flash + confetti */
+  .correct-anim { animation: correctPop var(--anim-correct) ease-out forwards; transform-origin:50% 60%; }
+      @keyframes correctPop { 0%{transform:scale(1) rotate(0deg);filter:hue-rotate(0deg) saturate(1);} 50%{transform:scale(1.18) rotate(5deg);filter:hue-rotate(90deg) saturate(1.4);}100%{transform:scale(1) rotate(0deg);filter:hue-rotate(0deg) saturate(1);} }
+
+      /* Confetti */
+  .confetti { position:absolute; bottom:40%; width:6px; height:6px; border-radius:50%; pointer-events:none; transform:translateY(0) scale(1); animation: confettiRise var(--anim-confetti) ease-out forwards; opacity:0.9; }
+      @keyframes confettiRise { 0%{transform:translateY(0) rotate(0deg) scale(0.8); opacity:1;} 50%{transform:translateY(-80px) rotate(180deg) scale(1.1); opacity:0.9;} 100%{transform:translateY(-140px) rotate(360deg) scale(1); opacity:0;} }
+
+      /* Shake for wrong combo: fast left-right oscillation (no hinge) */
+      @keyframes shakeX {
+        0% { transform: translateX(0); }
+        10% { transform: translateX(-25px); }
+        20% { transform: translateX(25px); }
+        30% { transform: translateX(-20px); }
+        40% { transform: translateX(20px); }
+        50% { transform: translateX(-15px); }
+        60% { transform: translateX(15px); }
+        70% { transform: translateX(-10px); }
+        80% { transform: translateX(10px); }
+        90% { transform: translateX(-5px); }
+        100% { transform: translateX(0); }
+      }
+      /* stronger, more visible shake for testing */
+  .shake { animation: shakeX 400ms ease-in-out 1 !important; transition: none !important; will-change: transform; }
+  /* ensure transition doesn't smooth out the keyframe and hint the GPU to optimize */
+  img.fingering-img.shake { /* transition: none !important; */ will-change: transform; }
+
+      /* Gamepad */
+        .gp-btn {
+          background:#0ea5a4; color:white; border:none; font-weight:800; font-size:1.35rem;
+          display:inline-flex; align-items:center; justify-content:center; cursor:pointer;
+          box-shadow: 0 8px 22px rgba(2,6,23,0.35);
+          transition: transform 160ms ease, box-shadow 160ms ease;
+          touch-action: manipulation;
+          -webkit-tap-highlight-color: rgba(0,0,0,0);
+        }
+        .gp-btn:active { transform: translateY(3px) scale(0.985); box-shadow: 0 6px 16px rgba(2,6,23,0.28); }
+        #gp-zero:active { transform: translateY(3px) scale(0.992); }
+
+        /* immediate pressed state (for quick tactile feedback) */
+        .gp-pressed { transform: translateY(2px) scale(0.975); box-shadow: 0 4px 10px rgba(2,6,23,0.25) !important; }
+
+  /* button flash for wrong attempts */
+  .gp-wrong { background: linear-gradient(90deg,#ef4444,#f97316) !important; color: white !important; transform: scale(1.02) !important; box-shadow: 0 10px 36px rgba(239,68,68,0.65) !important; }
+
+        /* red glow for wrong answer (stronger, higher specificity) */
+        @keyframes wrongGlow {
+          0% { box-shadow: 0 0 0 rgba(239,68,68,0); filter: saturate(1); }
+          40% { box-shadow: 0 0 36px rgba(239,68,68,1); filter: saturate(1.25); }
+          100% { box-shadow: 0 0 0 rgba(239,68,68,0); filter: saturate(1); }
+        }
+    /* align duration with shake so they occur together */
+  /* Run both the glow and the shake together so one doesn't override the other */
+  img.fingering-img.wrong-glow { animation: wrongGlow var(--anim-wrong-glow) ease forwards, shakeX var(--anim-shake) ease-in-out 1; box-shadow: 0 0 36px rgba(239,68,68,0.95) !important; border: 3px solid rgba(239,68,68,0.65) !important; }
+
+      /* 🔴 Balloon Pop Effect */
+      @keyframes pop-burst {
+        0% {
+          transform: scale(1);
+          filter: hue-rotate(0deg);
+          opacity: 1;
+        }
+        40% {
+          transform: scale(1.3);
+          filter: hue-rotate(20deg);
+        }
+        60% {
+          transform: scale(0.8);
+          filter: hue-rotate(-20deg);
+        }
+        100% {
+          transform: scale(0);
+          opacity: 0;
+          filter: blur(5px) hue-rotate(120deg);
+        }
+      }
+
+      .pop-burst {
+        animation: pop-burst 0.6s ease-out forwards;
+        transform-origin: center;
+      }
+
+        /* responsive: scale down on very small screens */
+        @media (max-width:420px) {
+          .gp-btn { font-size:1.05rem; }
+          #gp-zero { width: 260px !important; height: 68px !important; }
+          #gamepad > div button { width:80px !important; height:80px !important; }
+        }
+      .gp-btn:active,#gp-zero:active{transform:translateY(2px) scale(0.98);}
+      .gp-hint { box-shadow:0 10px 30px rgba(250,204,21,0.9); transform:scale(1.08); background:linear-gradient(90deg,#f59e0b,#fbbf24); color:#111827 !important; }
+
+      /* Streak pulse */
+      @keyframes streakPulse { 0%{transform:scale(1);}40%{transform:scale(1.08);box-shadow:0 18px 48px rgba(14,165,164,0.28);}100%{transform:scale(1);} }
+      .streak-pulse { animation: streakPulse 720ms cubic-bezier(.2,.9,.3,1); }
+
+      /* Bubbles (optional) */
+      .bubble { position:absolute; bottom:40%; border-radius:50%; pointer-events:none; transform:translateY(0) scale(0.6); animation:bubbleRise 900ms cubic-bezier(.2,.9,.3,1) forwards; opacity:0.95; mix-blend-mode:screen; box-shadow:0 10px 40px rgba(14,165,164,0.35); }
+      @keyframes bubbleRise {0%{transform:translateY(0) scale(0.6);opacity:0.95;}60%{transform:translateY(-90px) scale(1.05);opacity:0.9;}100%{transform:translateY(-140px) scale(1.25);opacity:0;}}
+      </style>
+    </div>
+  </main>
+
+  <script>
+    // @ts-nocheck
+    (function(){
+      /** @type {HTMLImageElement | null} */
+      const img = /** @type {HTMLImageElement | null} */ (document.getElementById('fingeringImg'));
+      if(!img) return;
+
+      // Notes with combos and frequency weights. We'll build a weighted draw pile below.
+      /** @type {{name:string,combo:string[],freq:number}[]} */
+      const notes = [
+        { name: "Fsharp0.png", combo: ["1","2","3"], freq: 1 },
+        { name: "G0.png", combo: ["1","3"], freq: 1 },
+        { name: "Gsharp0.png", combo: ["2","3"], freq: 1 },
+        { name: "Aflat0.png", combo: ["2","3"], freq: 1 },
+        { name: "A0.png", combo: ["1","2"], freq: 1 },
+        { name: "Asharp0.png", combo: ["1"], freq: 1 },
+        { name: "Bflat0.png", combo: ["1"], freq: 1 },
+        { name: "B0.png", combo: ["2"], freq: 1 },
+        { name: "Bsharp0.png", combo: ["0"], freq: 3 },
+        { name: "Cflat1.png", combo: ["2"], freq: 3 },
+        { name: "C1.png", combo: ["0"], freq: 1 },
+        { name: "Csharp1.png", combo: ["1","2","3"], freq: 1 },
+        { name: "Dflat1.png", combo: ["1","2","3"], freq: 1 },
+        { name: "D1.png", combo: ["1"], freq: 1 },
+        { name: "Dsharp1.png", combo: ["2","3"], freq: 1 },
+        { name: "Eflat1.png", combo: ["2","3"], freq: 1 },
+        { name: "E1.png", combo: ["1","2"], freq: 1 },
+        { name: "Esharp1.png", combo: ["1"], freq: 3 },
+        { name: "Fflat1.png", combo: ["1","2"], freq: 3 },
+        { name: "F1.png", combo: ["1"], freq: 1 },
+        { name: "Fsharp1.png", combo: ["2"], freq: 1 },
+        { name: "G1.png", combo: ["0"], freq: 1 },
+        { name: "Gsharp1.png", combo: ["2","3"], freq: 1 },
+        { name: "Aflat1.png", combo: ["2","3"], freq: 1 },
+        { name: "A1.png", combo: ["1","2"], freq: 1 },
+        { name: "Asharp1.png", combo: ["1"], freq: 1 },
+        { name: "Bflat1.png", combo: ["1"], freq: 1 },
+        { name: "B1.png", combo: ["2"], freq: 1 },
+        { name: "Bsharp1.png", combo: ["0"], freq: 3 },
+        { name: "Cflat2.png", combo: ["2"], freq: 3 },
+        { name: "C2.png", combo: ["0"], freq: 1 },
+        { name: "Csharp2.png", combo: ["1","2"], freq: 1 },
+        { name: "Dflat2.png", combo: ["1","2"], freq: 1 },
+        { name: "D2.png", combo: ["1"], freq: 1 },
+        { name: "Dsharp2.png", combo: ["2"], freq: 1 },
+        { name: "Eflat2.png", combo: ["2"], freq: 1 },
+        { name: "E2.png", combo: ["0"], freq: 1 },
+        { name: "Esharp2.png", combo: ["1"], freq: 3 },
+        { name: "Fflat2.png", combo: ["0"], freq: 3 },
+        { name: "F2.png", combo: ["1"], freq: 1 },
+        { name: "Fsharp2.png", combo: ["2"], freq: 1 },
+        { name: "G2.png", combo: ["0"], freq: 1 },
+        { name: "Gsharp2.png", combo: ["2","3"], freq: 1 },
+        { name: "Aflat2.png", combo: ["2","3"], freq: 1 },
+        { name: "A2.png", combo: ["1","2"], freq: 1 },
+        { name: "Asharp2.png", combo: ["1"], freq: 1 },
+        { name: "Bflat2.png", combo: ["1"], freq: 1 },
+        { name: "B2.png", combo: ["2"], freq: 1 },
+        { name: "C3.png", combo: ["0"], freq: 1 }
+      ];
+
+      // Build mapping name -> combo for quick lookup
+      /** @type {{[key:string]: string[]}} */
+      const answerKey = {};
+      notes.forEach(n=>{ answerKey[n.name] = n.combo.slice(); });
+
+        // Run tracking (25-card runs)
+        let runCount = 0;
+        let runCorrect = 0;
+        const RUN_LIMIT = 25;
+
+      // Image filename list (unique names)
+      /** @type {string[]} */
+      let images = notes.map(n=>n.name);
+      /** @type {number} */
+      let currentIndex = images.indexOf(String(img.dataset.initial || images[0] || '')) || 0;
+
+      // Build a weighted name array for the draw pile (more copies = more common)
+      /** @type {string[]} */
+      const weightedNames = [];
+      notes.forEach(note => {
+        // weight: 1 = most frequent -> 3 copies, 3 = least -> 1 copy
+        const weight = Math.max(1, 4 - (note.freq || 1));
+        for (let i = 0; i < weight; i++) weightedNames.push(note.name);
+      });
+
+  /** @type {Set<string>} */
+  const activeKeys = new Set();
+  /** @type {{key:string,time:number}[]} */
+  const recentPresses = [];
+  // make detection snappier for quicker UX; small but allows multi-key simultaneity
+  const TOUCH_WINDOW = 120;
+  // Read CSS timing variables (return milliseconds)
+  function cssMs(varName, fallbackMs){
+    try{
+      const v = getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || '';
+      if(!v) return fallbackMs;
+      if(v.endsWith('ms')) return parseFloat(v.replace('ms',''));
+      if(v.endsWith('s')) return parseFloat(v.replace('s',''))*1000;
+      return fallbackMs;
+    }catch(e){return fallbackMs;}
+  }
+  const ANIM_POP = cssMs('--anim-pop', 680);
+  const ANIM_CORRECT = cssMs('--anim-correct', 700);
+  const ANIM_CONFETTI = cssMs('--anim-confetti', 1000);
+  const ANIM_SHAKE = cssMs('--anim-shake', 360);
+  const ANIM_WRONG_GLOW = cssMs('--anim-wrong-glow', 360);
+  const ANIM_SAFETY = cssMs('--anim-safety', 420);
+  const REVEAL_DURATION = cssMs('--reveal-duration', 2500);
+  const PRESS_DURATION = cssMs('--press-duration', 120);
+  /** @type {number|null} */
+  let wrongTimeout = null;
+    /** @type {{[k:string]:number}} */
+    const wrongCounts = {};
+  /** @type {number|null} */
+  let revealTimeout = null;
+  // track when the last correct animation started/ended to avoid overlapping wrong visuals
+  let lastCorrectAt = 0;
+      let streak = parseInt(localStorage.getItem('fingering-streak')||'0',10)||0;
+      let best = parseInt(localStorage.getItem('fingering-best')||'0',10)||0;
+      const streakEl = document.getElementById('streak-value');
+      const bestEl = document.getElementById('best-value');
+    if(streakEl) streakEl.textContent = String(streak);
+    if(bestEl) bestEl.textContent = String(best);
+
+      /** @param {number} idx */
+      function setImage(idx){
+        // clear any visible hints when switching cards
+        clearHints();
+        const filename = images[idx];
+        const url = `/assets/images/${encodeURIComponent(filename)}`;
+        const pre = new Image();
+        pre.src = url;
+        pre.onload = ()=>{ if(img) img.src = url; }
+      }
+
+      function clearHints(){
+        try{
+          const buttons = document.querySelectorAll('#gamepad [data-button]');
+          buttons.forEach(b=>b.classList.remove('gp-hint'));
+        }catch(e){}
+        if(revealTimeout){ clearTimeout(revealTimeout); revealTimeout = null; }
+      }
+
+      // Shuffle helper (Fisher-Yates)
+      /** @param {string[]} a */
+      function shuffleArray(a){
+        const arr = a.slice();
+        for(let i=arr.length-1;i>0;i--){
+          const j = Math.floor(Math.random()*(i+1));
+          [arr[i],arr[j]] = [arr[j],arr[i]];
+        }
+        return arr;
+      }
+
+      // Draw pile: use weightedNames for a weighted random presentation
+      let drawPile = shuffleArray(weightedNames.slice());
+      // remove the initial image occurrence(s) from the pile to avoid immediate repeat
+      (function removeInitialFromPile(){
+        const init = String(images[currentIndex] || img.dataset.initial || '');
+        // remove all occurrences of the initial filename from the weighted pile
+        drawPile = drawPile.filter(n => n !== init);
+      })();
+
+      function pickNextRandom(){
+        if(drawPile.length === 0) drawPile = shuffleArray(weightedNames.slice());
+        // pop from the end for efficiency
+        let nextFile = drawPile.pop();
+        // avoid immediate repeat if possible
+        if(images.length>1 && nextFile === images[currentIndex]){
+          // try to take another; push the same file back to front
+          drawPile.unshift(nextFile);
+          nextFile = drawPile.pop();
+        }
+        // find the index in the canonical images list (first occurrence)
+        const idx = images.indexOf(nextFile);
+        if(idx>=0) {
+          currentIndex = idx;
+          setImage(currentIndex);
+        } else {
+          // fallback: if not found (shouldn't happen), pick a random index
+          currentIndex = Math.floor(Math.random()*images.length);
+          setImage(currentIndex);
+        }
+      }
+
+      function advanceToNext(){ pickNextRandom(); }
+
+      function triggerCorrect(){
+        if(!img) return;
+        img.classList.remove('correct-anim');
+        void img.offsetWidth;
+        img.classList.add('correct-anim');
+        lastCorrectAt = Date.now();
+  for(let i=0;i<5;i++){spawnConfetti(i*40);}
+        runCount++;
+        runCorrect++;
+        checkRunCompleteIfNeeded();
+  setTimeout(()=>{ if(img) img.classList.remove('correct-anim'); }, ANIM_CORRECT);
+      }
+
+      /** @param {number} [delay] */
+      function spawnConfetti(delay=0){
+        setTimeout(()=>{
+          const conf = document.createElement('div');
+          conf.classList.add('confetti');
+          conf.style.left = `${Math.random()*80+10}%`;
+          conf.style.backgroundColor = `hsl(${Math.random()*360},70%,60%)`;
+          if(img && img.parentElement) img.parentElement.appendChild(conf);
+    setTimeout(()=>conf.remove(), ANIM_CONFETTI);
+        }, delay);
+      }
+
+      function triggerShake(){
+        // kept for compatibility: use the synchronized triggerWrongVisual for combined visuals
+        if(!img) return;
+        img.classList.remove('shake');
+        void img.offsetWidth;
+        img.classList.add('shake');
+  setTimeout(()=>{ if(img) img.classList.remove('shake'); }, ANIM_SHAKE + 40);
+      }
+
+      // Add wrong visual (red glow + shake) using forced reflow to reliably restart animations
+      /** @param {HTMLElement|null} pressedBtn */
+      function triggerWrongVisual(pressedBtn){
+        // If a correct animation started very recently, skip wrong visuals to avoid overlap
+        const now = Date.now();
+        if (now - lastCorrectAt < 500) {
+          console.log('[fingering] triggerWrongVisual ignored due to recent correct at', lastCorrectAt, 'now', now);
+          return;
+        }
+        const filename = images[currentIndex];
+        wrongCounts[filename] = (wrongCounts[filename] || 0) + 1;
+
+  // Remove only the relevant classes and any pressed indicator
+  if(img) img.classList.remove('wrong-glow', 'shake');
+  if (pressedBtn) pressedBtn.classList.remove('gp-wrong', 'gp-pressed');
+
+        // Force a reflow so the browser recognizes the class removal
+        if(img) void img.offsetWidth;
+
+  // Start both wrong glow and shake (red image glow + button flash)
+  if(img) img.classList.add('wrong-glow', 'shake');
+  if (pressedBtn) pressedBtn.classList.add('gp-wrong');
+
+  console.log('[fingering] triggerWrongVisual applied classes', img?.className);
+
+        // Try to trigger a short haptic/vibration on supported mobile devices
+        try{
+          if(typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function'){
+            // short buzz to indicate wrong answer
+            const pattern = 60;
+            navigator.vibrate(pattern);
+            // expose a debug trace for DevTools: last haptic and an event
+            try{ window.__lastHaptic = { time: Date.now(), pattern: pattern, file: filename }; }catch(e){}
+            try{ console.info('[fingering] haptic fired', { pattern, filename }); }catch(e){}
+            try{ window.dispatchEvent(new CustomEvent('fingering:haptic', { detail: { pattern, filename, time: Date.now() } })); }catch(e){}
+          }
+        }catch(e){}
+
+        // Remove when the animation finishes. Use animationend for reliability,
+        // with a forced fallback that sets inline animation to 'none' then removes classes.
+        let cleaned = false;
+        const cleanup = () => {
+          if (cleaned) return;
+          cleaned = true;
+          if (img) img.classList.remove('wrong-glow', 'shake', 'pop-burst');
+          if (pressedBtn) pressedBtn.classList.remove('gp-wrong', 'gp-pressed');
+          if(img) img.removeEventListener('animationend', cleanup);
+          // clear inline animation override if any
+          try { img.style.animation = ''; } catch (e) {}
+          console.log('[fingering] triggerWrongVisual cleaned up classes', img?.className);
+        };
+        if(img) img.addEventListener('animationend', cleanup, { once: true });
+
+  // Safety fallback: force stop the animation and cleanup after anim safety ms
+  const safety = setTimeout(() => {
+          if (!cleaned) {
+            try { img.style.animation = 'none'; } catch (e) {}
+            // force reflow to flush the inline animation change
+            if(img) void img.offsetWidth;
+            cleanup();
+          }
+          clearTimeout(safety);
+        }, ANIM_SAFETY);
+
+        // also trigger the pop-burst effect on the image for a fun visual
+        if(img){
+          // restart if already present
+          img.classList.remove('pop-burst');
+          void img.offsetWidth;
+          img.classList.add('pop-burst');
+          // small confetti burst near the image
+          try{
+            for (let i = 0; i < 8; i++) {
+              const conf = document.createElement('div');
+              conf.classList.add('confetti');
+              conf.style.left = `${10 + Math.random() * 80}%`;
+              conf.style.backgroundColor = `hsl(${Math.random() * 360},70%,60%)`;
+              if(img && img.parentElement) img.parentElement.appendChild(conf);
+              setTimeout(() => { try{ conf.remove(); }catch(e){} }, 800);
+            }
+          }catch(e){}
+        }
+
+        // reset streak
+        streak = 0; try { localStorage.setItem('fingering-streak','0'); } catch(e){}
+        if (streakEl) streakEl.textContent = '0';
+        if ((wrongCounts[filename]||0) >= 3) { revealComboForCurrent(); wrongCounts[filename] = 0; }
+        runCount++;
+        checkRunCompleteIfNeeded();
+      }
+
+      function showRunOverlay(){
+        const overlay = document.getElementById('run-overlay');
+        const scoreEl = document.getElementById('run-score');
+        const msg = document.getElementById('run-msg');
+        const title = document.getElementById('run-title');
+        if(!overlay||!scoreEl) return;
+        const pct = Math.round((runCorrect / Math.max(1, runCount)) * 100);
+        scoreEl.textContent = pct + '%';
+        if(pct >= 85){
+          title.textContent = 'Great job!';
+          msg.textContent = 'You scored ' + pct + '%. 🎉';
+          for(let i=0;i<12;i++) spawnConfetti(i*30);
+        } else {
+          title.textContent = 'Run complete';
+          msg.textContent = 'You scored ' + pct + '%. Keep practicing!';
+        }
+        overlay.style.display = 'flex';
+        const restart = document.getElementById('run-restart');
+        const close = document.getElementById('run-close');
+        if(restart) restart.onclick = ()=>{ overlay.style.display='none'; runCount=0; runCorrect=0; pickNextRandom(); };
+        if(close) close.onclick = ()=>{ overlay.style.display='none'; };
+      }
+
+      function checkRunCompleteIfNeeded(){
+        if(runCount >= RUN_LIMIT){
+          if(wrongTimeout){ clearTimeout(wrongTimeout); wrongTimeout=null; }
+          showRunOverlay();
+        }
+      }
+
+      function revealComboForCurrent(){
+        const currentFilename = String(images[currentIndex]);
+        const req = answerKey[currentFilename]||[];
+        const buttons = document.querySelectorAll('#gamepad [data-button]');
+        buttons.forEach(b=>{if(req.includes(String(b.getAttribute('data-button'))))b.classList.add('gp-hint');});
+  if(revealTimeout) clearTimeout(revealTimeout);
+  revealTimeout = /** @type {number} */ (setTimeout(()=>{ try{ buttons.forEach(b=>b.classList.remove('gp-hint')); }catch(e){} revealTimeout=null; }, REVEAL_DURATION));
+      }
+
+      function checkComboAndAdvance(){
+        const filename = String(images[currentIndex]);
+        const req = /** @type {string[]} */ (answerKey[filename]||[]);
+        console.log('[fingering] checkComboAndAdvance', { currentIndex, filename, req, activeKeys: Array.from(activeKeys), recentPressesLength: recentPresses.length });
+        /** @type {Set<string>} */
+        const nowKeys = new Set(activeKeys);
+        const now = Date.now();
+        for(let i=recentPresses.length-1;i>=0;i--){if(now-recentPresses[i].time<=TOUCH_WINDOW) nowKeys.add(recentPresses[i].key); else recentPresses.splice(i,1);}
+        const ok = req.every(/** @param {string} k */ (k)=>nowKeys.has(k));
+        if(ok){
+          triggerCorrect();
+          advanceToNext();
+          activeKeys.clear();
+          recentPresses.length=0;
+          if(wrongTimeout){ clearTimeout(wrongTimeout); wrongTimeout = null; }
+          wrongCounts[filename]=0;
+          streak++; localStorage.setItem('fingering-streak', String(streak));
+          if(streakEl) streakEl.textContent=String(streak);
+          if(streak>best){best=streak; localStorage.setItem('fingering-best', String(best)); if(bestEl) bestEl.textContent=String(best);}
+          const streakNode = document.getElementById('streak');
+          if(streakNode) streakNode.classList.add('streak-pulse');
+          setTimeout(()=>{ const sn = document.getElementById('streak'); if(sn) sn.classList.remove('streak-pulse'); },900);
+          return true;
+        }
+        return false;
+      }
+
+      function handleWrong(){
+        console.log('[fingering] handleWrong scheduling wrong visual (touch window)', { currentIndex, filename: images[currentIndex] });
+  if(wrongTimeout) clearTimeout(wrongTimeout);
+  const filename = String(images[currentIndex]);
+        // Delay slightly to allow multi-key grouping, but when fired, run synchronized visual
+        const scheduledFilename = String(images[currentIndex]);
+        wrongTimeout = /** @type {number} */ (setTimeout(()=>{
+          // If the shown image changed since scheduling, skip — counts/reveal are per-card
+          if (String(images[currentIndex]) !== scheduledFilename) {
+            console.log('[fingering] scheduled wrong skipped because card changed', { scheduledFilename, currentShown: images[currentIndex] });
+            wrongTimeout = null;
+            return;
+          }
+          // If a correct animation ran since this timeout was scheduled, skip firing the wrong visual.
+          const now2 = Date.now();
+          if (now2 - lastCorrectAt < 600) {
+            console.log('[fingering] skipped scheduled wrong visual because a correct happened', { now: now2, lastCorrectAt });
+            wrongTimeout = null;
+            return;
+          }
+          const pressedBtn = /** @type {HTMLElement|null} */ (document.querySelector('#gamepad .gp-pressed'));
+          console.log('[fingering] scheduled wrong visual firing', { now: now2, lastCorrectAt, scheduledFilename });
+          triggerWrongVisual(pressedBtn);
+          wrongTimeout=null;
+  }, Math.max(10, TOUCH_WINDOW)));
+      }
+
+      // Keyboard
+      window.addEventListener('keydown',e=>{
+        let k='';
+        if(e.code&&e.code.startsWith('Numpad')) k=e.code.replace('Numpad','');
+        else if(e.key&&/^[0-9]$/.test(e.key)) k=e.key;
+        if(!k||!['0','1','2','3'].includes(k)) return;
+        console.log('[fingering] keydown', k);
+        activeKeys.add(k);
+        const matched = checkComboAndAdvance();
+        if(!matched){
+          // determine whether immediate wrong feedback is safe (single-key required)
+          const filename = images[currentIndex];
+          const req = /** @type {string[]} */ (answerKey[filename] || []);
+          if(req.length === 1 && !req.includes(k)){
+            // immediate strong feedback for single-key mismatches
+            triggerWrongVisual(null);
+          } else {
+            handleWrong();
+          }
+        }
+      });
+      window.addEventListener('keyup',e=>{
+        let k='';
+        if(e.code&&e.code.startsWith('Numpad')) k=e.code.replace('Numpad','');
+        else if(e.key&&/^[0-9]$/.test(e.key)) k=e.key;
+        if(!k) return;
+        activeKeys.delete(k);
+      });
+
+      // Gamepad
+      document.querySelectorAll('#gamepad [data-button]').forEach(b=>{
+        const key=b.getAttribute('data-button');
+        if(!key) return;
+        const press=()=>{
+          console.log('[fingering] gamepad press', key);
+          recentPresses.push({key,time:Date.now()});
+          const matched = checkComboAndAdvance();
+          if(!matched){
+            const filename = images[currentIndex];
+            const req = /** @type {string[]} */ (answerKey[filename] || []);
+            // quick pressed visual
+            b.classList.add('gp-pressed');
+            setTimeout(()=>b.classList.remove('gp-pressed'), PRESS_DURATION);
+            if(req.length === 1 && !req.includes(key)){
+              triggerWrongVisual(b);
+            } else {
+              handleWrong();
+            }
+          } else {
+            // matched: show pressed briefly
+            b.classList.add('gp-pressed');
+            setTimeout(()=>b.classList.remove('gp-pressed'), PRESS_DURATION);
+          }
+        }
+        b.addEventListener('click',press);
+        b.addEventListener('touchstart',e=>{e.preventDefault(); press();},{passive:false});
+      });
+
+  // Test shake removed — no button wiring
+
+      // Click image to randomize
+      img.addEventListener('click',()=>{
+        let next=Math.floor(Math.random()*images.length);
+        while(images.length>1&&next===currentIndex) next=Math.floor(Math.random()*images.length);
+        currentIndex=next; setImage(currentIndex);
+      });
+    })();
+  </script>
+</Layout>
