@@ -1,0 +1,29 @@
+<div class="button-pad">
+  <button id="btn0">0</button>
+  <button id="btn1">1</button>
+  <button id="btn2">2</button>
+  <button id="btn3">3</button>
+</div>
+
+<style>
+.button-pad {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+button {
+  background: #ccc;
+  border: none;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+button.active {
+  background: #800000;
+  color: white;
+  transform: scale(0.95);
+}
+</style>

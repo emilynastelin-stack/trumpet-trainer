@@ -1,0 +1,95 @@
+---
+// No frontmatter needed for static links
+---
+<style>
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #1e293b 0%, #64748b 100%);
+  color: white;
+  position: relative;
+  font-family: sans-serif;
+}
+
+.brand {
+  font-weight: bold;
+  font-size: 1.25rem;
+}
+
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 25px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.hamburger div {
+  height: 3px;
+  background: white;
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+
+/* Dropdown menu */
+.menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  color: black;
+  width: 150px;
+  display: none;
+  flex-direction: column;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+  z-index: 10;
+}
+
+.menu a {
+  padding: 0.75rem 1rem;
+  text-decoration: none;
+  color: black;
+  transition: background 0.2s;
+}
+
+.menu a:hover {
+  background: #f0f0f0;
+}
+
+.menu.show {
+  display: flex;
+}
+</style>
+
+<nav>
+  <div class="hamburger" id="hamburger">
+    <div></div>
+    <div></div>
+    <div></div>
+  </div>
+
+  <div class="menu" id="dropdown">
+    <a href="/">Home</a>
+  </div>
+</nav>
+
+<script>
+const hamburger = document.getElementById('hamburger');
+const dropdown = document.getElementById('dropdown');
+
+hamburger.addEventListener('click', () => {
+  dropdown.classList.toggle('show');
+});
+
+// Optional: close menu when clicking outside
+document.addEventListener('click', e => {
+  if (!hamburger.contains(e.target) && !dropdown.contains(e.target)) {
+    dropdown.classList.remove('show');
+  }
+});
+</script>
