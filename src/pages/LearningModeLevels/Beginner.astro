@@ -30,7 +30,7 @@ const initialImage = serverImages[Math.floor(Math.random() * serverImages.length
   <main style="display:flex; flex-direction:column; align-items:center; justify-content:center; padding-top:0; min-height:100vh; padding-left:2rem; padding-right:2rem; box-sizing:border-box; background: #1f1c2c; color: white; position:relative;">
 
     <!-- Streak display (moved above card) -->
-    <div id="streak" style="position: absolute; top: 16px; right: 16px; background: rgba(0,0,0,0.36); color: #fff; padding: 0.5rem 0.75rem; border-radius: 10px; font-weight:700; box-shadow: 0 6px 18px rgba(0,0,0,0.6); z-index:12;">
+  <div id="streak" style="position:fixed; top: 72px; right: 16px; background: rgba(0,0,0,0.36); color: #fff; padding: 0.5rem 0.75rem; border-radius: 10px; font-weight:700; box-shadow: 0 6px 18px rgba(0,0,0,0.6); z-index:120;">
       Streak: <span id="streak-value">0</span>
       <small style="opacity:0.8; margin-left:6px;">Best: <span id="best-value">0</span></small>
     </div>
@@ -48,7 +48,7 @@ const initialImage = serverImages[Math.floor(Math.random() * serverImages.length
       </div>
     </div>
 
-  <div class="card" style="position:relative; width:100%; max-width:760px; box-sizing:border-box; padding:1rem; border-radius:14px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); box-shadow:0 18px 60px rgba(2,6,23,0.6); transform: translateY(6vh); transition: transform 320ms ease;">
+  <div class="card" style="position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); width: min(760px,96%); box-sizing:border-box; padding:1rem; border-radius:14px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); box-shadow:0 18px 60px rgba(2,6,23,0.6); overflow:auto; max-height: calc(100vh - 120px);">
 
       <!-- Fingering Image -->
       <img
@@ -639,6 +639,39 @@ const initialImage = serverImages[Math.floor(Math.random() * serverImages.length
         while(images.length>1&&next===currentIndex) next=Math.floor(Math.random()*images.length);
         currentIndex=next; setImage(currentIndex);
       });
+    })();
+  </script>
+  <script>
+    (function(){
+      function adjustCardAndStreak(){
+        try{
+          const nav = document.querySelector('nav');
+          const card = document.querySelector('.card');
+          const streak = document.getElementById('streak');
+          if(!card || !(card instanceof HTMLElement)) return;
+          const navHeight = nav ? nav.getBoundingClientRect().height : 0;
+          const safeGap = 50;
+          const available = Math.max(200, window.innerHeight - (navHeight + safeGap + 40));
+          card.style.maxHeight = available + 'px';
+          const viewportCenterY = window.innerHeight / 2;
+          const cardHalf = card.offsetHeight / 2;
+          let desiredTop = viewportCenterY - cardHalf;
+          const minTop = navHeight + safeGap;
+          if(desiredTop < minTop){
+            const topPx = minTop + cardHalf;
+            const delta = topPx - viewportCenterY;
+            card.style.transform = `translate(-50%,-50%) translateY(${delta}px)`;
+          } else {
+            card.style.transform = 'translate(-50%,-50%)';
+          }
+          if(streak && streak instanceof HTMLElement){
+            streak.style.top = (navHeight + 12) + 'px';
+          }
+        }catch(e){ console.warn('adjustCardAndStreak error', e); }
+      }
+      window.addEventListener('load', adjustCardAndStreak);
+      window.addEventListener('resize', adjustCardAndStreak);
+      setTimeout(adjustCardAndStreak, 120);
     })();
   </script>
 </Layout>

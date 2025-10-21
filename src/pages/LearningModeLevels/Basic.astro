@@ -37,7 +37,7 @@ const initialImage = serverImages[Math.floor(Math.random() * serverImages.length
       </div>
     </div>
 
-  <div class="card" style="position:relative; width:100%; max-width:760px; box-sizing:border-box; padding:1rem; border-radius:14px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); box-shadow:0 18px 60px rgba(2,6,23,0.6); transform: translateY(6vh); transition: transform 320ms ease;">
+  <div class="card" style="position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); width: min(760px,96%); box-sizing:border-box; padding:1rem; border-radius:14px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); box-shadow:0 18px 60px rgba(2,6,23,0.6); overflow:auto; max-height: calc(100vh - 120px);">
 
       <!-- Fingering Image -->
       <img
@@ -619,6 +619,44 @@ const initialImage = serverImages[Math.floor(Math.random() * serverImages.length
         while(images.length>1&&next===currentIndex) next=Math.floor(Math.random()*images.length);
         currentIndex=next; setImage(currentIndex);
       });
+    })();
+  </script>
+  <script>
+    // Keep the fixed .card centered while ensuring it doesn't overlap the navbar
+    (function(){
+      function adjustCardForViewport(){
+        try{
+          const nav = document.querySelector('nav');
+          const card = document.querySelector('.card');
+          if(!card || !(card instanceof HTMLElement)) return;
+          const navHeight = nav ? nav.getBoundingClientRect().height : 0;
+          const safeGap = 50; // minimal gap from navbar
+          // Compute the maximum height available for the card so it fits between navbar and bottom with gaps
+          const available = Math.max(200, window.innerHeight - (navHeight + safeGap + 40));
+          card.style.maxHeight = available + 'px';
+          // If the navbar intrudes into the vertical center, nudge the card slightly downward so its visual center
+          // remains perceptually centered relative to visible area beneath the navbar. We compute the center of
+          // the viewport and ensure the card's center is at that pixel, but if that would overlap the navbar
+          // by less than safeGap, we shift down to maintain the gap.
+          const viewportCenterY = window.innerHeight / 2;
+          const cardHalf = card.offsetHeight / 2;
+          let desiredTop = viewportCenterY - cardHalf; // top position in px relative to viewport
+          const minTop = navHeight + safeGap; // do not allow top to be above this
+          if(desiredTop < minTop) {
+            // compute the translateY that will place the card so its top equals minTop
+            const topPx = minTop + cardHalf; // desired center Y
+            const delta = topPx - viewportCenterY;
+            card.style.transform = `translate(-50%,-50%) translateY(${delta}px)`;
+          } else {
+            // reset to perfect center
+            card.style.transform = 'translate(-50%,-50%)';
+          }
+        }catch(e){ console.warn('adjustCardForViewport error', e); }
+      }
+      window.addEventListener('load', adjustCardForViewport);
+      window.addEventListener('resize', adjustCardForViewport);
+      // run after a small delay to catch layout shifts
+      setTimeout(adjustCardForViewport, 120);
     })();
   </script>
 </Layout>
