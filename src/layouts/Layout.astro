@@ -8,6 +8,10 @@ import Footer from '../components/Footer.astro';
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Trumpet Trainer</title>
     <style>
+      /* Basic page shell — allow pages to control most visuals while
+         enforcing a sticky-footer layout. When content is short the
+         footer will sit at the bottom of the viewport; when content is
+         tall the footer follows the document and is reachable by scroll. */
       html, body {
         height: 100%;
         margin: 0;
@@ -15,29 +19,39 @@ import Footer from '../components/Footer.astro';
         background: #1f1c2c;
         font-family: 'Roboto', sans-serif;
         color: white;
-        overflow: hidden; /* prevents scrolling */
+        /* allow normal scrolling when content overflows */
+        overflow: auto;
       }
 
       body {
         display: flex;
         flex-direction: column;
+        /* Use viewport-based min-height so the flex layout can push the
+           footer to the bottom when content is short. Keep a fallback
+           for older browsers. */
+        min-height: 100dvh;
         min-height: 100vh;
       }
 
       main {
-        flex: 1 1 auto; /* flexible but can shrink */
+        /* Grow to take remaining space; when there's little content the
+           slot area expands so the footer is pushed to the bottom. */
+        flex: 1 0 auto;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         position: relative;
-        padding: 1rem; 
+        padding: 1rem;
         box-sizing: border-box;
-        overflow: hidden; /* prevent main from scrolling */
+        width: 100%;
       }
 
+      /* Footer should not shrink and will appear at viewport bottom when
+         the main content is small. Keep styling light — the footer itself
+         is responsible for its responsive padding and background. */
       footer {
-        flex-shrink: 0; /* stay at bottom */
+        flex-shrink: 0;
       }
     </style>
   </head>
